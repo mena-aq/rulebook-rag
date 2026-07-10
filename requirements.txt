@@ -1,0 +1,17 @@
+streamlit<1.41
+google-genai
+groq
+
+qdrant-client
+
+pydantic
+
+PyMuPDF
+streamlit-pdf-viewer
+
+python-dotenv
+PyYAML
+
+tiktoken
+
+tqdm

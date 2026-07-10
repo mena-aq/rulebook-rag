@@ -1,0 +1,27 @@
+llm:
+  gemini:
+    model: gemini-2.5-flash
+    temperature: 0
+  groq:
+    model: llama-3.3-70b-versatile
+    temperature: 0
+
+embedding:
+  model: gemini-embedding-001
+
+chunking:
+  max_tokens: 256
+  overlap_tokens: 50
+
+retrieval:
+  top_k: 5
+  top_p: 0.6
+
+qdrant:
+  host: localhost
+  port: 6333
+  collection: student_rulebook
+
+paths:
+  pdf: data/student_rulebook.pdf
+  highlights: highlights/
