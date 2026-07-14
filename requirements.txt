@@ -15,3 +15,5 @@ PyYAML
 tiktoken
 
 tqdm
+
+pdf2image

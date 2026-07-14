@@ -1,4 +1,5 @@
 import os
+import re
 import groq
 
 from utils.prompt_loader import load_prompt
@@ -9,7 +10,7 @@ llm_model = config["llm"]["groq"]["model"]
 temperature = config["llm"]["groq"]["temperature"]
 seed = config["llm"]["groq"].get("seed", None)
 
-def generate_answer(question: str, retrieved_chunks: list) -> str:
+def generate_answer(question: str, retrieved_chunks: list) -> tuple:
     """Generates an answer to the user's question based on the retrieved chunks
     
     Args:
@@ -17,8 +18,11 @@ def generate_answer(question: str, retrieved_chunks: list) -> str:
         retrieved_chunks (list): The retrieved chunks
         
     Returns:
-        str: The generated answer
+        tuple: (answer, referenced_page) where referenced_page is an int or None
     """
+    if not retrieved_chunks:
+        return "I'm sorry, I couldn't find any relevant information in the Student Rulebook to answer your question.", None
+
     prompt_template = load_prompt("answer_generator")
     
     context_str = ""
@@ -43,4 +47,10 @@ def generate_answer(question: str, retrieved_chunks: list) -> str:
         seed=seed,
     )
     
-    return response.choices[0].message.content.strip()
+    raw = response.choices[0].message.content.strip()
+
+    match = re.search(r"\[REFERENCED_PAGE:\s*(\d+)\]", raw)
+    referenced_page = int(match.group(1)) if match else None
+    answer = re.sub(r"\s*\[REFERENCED_PAGE:\s*\d+\]\s*$", "", raw).strip()
+
+    return answer, referenced_page

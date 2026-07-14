@@ -6,6 +6,11 @@ If the answer cannot be found in the context, clearly state that you do not know
 When citing your sources, only refer to the page numbers provided (e.g. "According to Page 5..."). Never use words like "chunk" or "context block".
 Never fabricate policies, rules, dates, numbers, or requirements that are unsupported by the retrieved context.
 
+After your answer, always end with a metadata line in this exact format (do not add any other text after it):
+[REFERENCED_PAGE: <page_number>]
+
+Use the page number from the context that is most relevant to the primary answer. If your answer spans multiple pages, use the first referenced page.
+
 Context:
 {context}
 

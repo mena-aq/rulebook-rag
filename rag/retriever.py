@@ -2,6 +2,9 @@ from qdrant_client import QdrantClient
 from google import genai
 
 from config.config import config, GEMINI_API_KEY
+from utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 genai_client = genai.Client(api_key=GEMINI_API_KEY)
 
@@ -44,5 +47,9 @@ def retrieve_chunks(query: str) -> list:
     chunks = []
     for point in search_result.points:
         chunks.append(point.payload)
-    
+
+    logger.info("Retrieved %d chunks:", len(chunks))
+    for i, chunk in enumerate(chunks):
+        logger.info("Chunk %d: %s", i + 1, chunk)
+
     return chunks

@@ -19,6 +19,8 @@ if "current_page" not in st.session_state:
     st.session_state.current_page = 1
 if "pages_to_render" not in st.session_state:
     st.session_state.pages_to_render = [1]
+if "pdf_key" not in st.session_state:
+    st.session_state.pdf_key = 0
 
 # Main layout: Chat + PDF viewer side by side
 col1, col2 = st.columns([1, 1], gap="large")
@@ -45,7 +47,7 @@ with col1:
             with st.chat_message("assistant"):
                 with st.spinner("Searching rulebook..."):
                     try:
-                        # Build chat history for context (optional)
+                        # Build chat history for context
                         chat_history = [
                             {"role": m["role"], "content": m["content"]} 
                             for m in st.session_state.messages[:-1]
@@ -54,22 +56,20 @@ with col1:
                         # Query pipeline
                         standalone_query = rewrite_query(chat_history, prompt)
                         retrieved_chunks = retrieve_chunks(standalone_query)
-                        answer = generate_answer(prompt, retrieved_chunks)
+                        answer, referenced_page = generate_answer(prompt, retrieved_chunks)
                         
-                        # Extract page references
-                        relevant_pages = set()
-                        for chunk in retrieved_chunks:
-                            if 'page_start' in chunk and chunk['page_start']:
-                                p_start = chunk['page_start']
-                                p_end = chunk.get('page_end', p_start)
-                                if p_end is None:
-                                    p_end = p_start
-                                for p in range(p_start, p_end + 1):
-                                    relevant_pages.add(p) # 1-indexed
+                        # Use the page referenced by the answer generator
+                        if referenced_page is not None:
+                            st.session_state.current_page = referenced_page
+                            st.session_state.pages_to_render = [referenced_page]
+                        elif retrieved_chunks:
+                            # Fallback: use first chunk's page_start
+                            first_page = retrieved_chunks[0].get('page_start')
+                            if first_page:
+                                st.session_state.current_page = first_page
+                                st.session_state.pages_to_render = [first_page]
                         
-                        if relevant_pages:
-                            st.session_state.pages_to_render = sorted(list(relevant_pages))
-                            st.session_state.current_page = st.session_state.pages_to_render[0]
+                        st.session_state.pdf_key += 1
                         
                         # Display answer
                         st.markdown(answer)
@@ -96,44 +96,52 @@ with col2:
         st.error(f"PDF not found at {pdf_path}")
     else:
         try:
-            # Use streamlit-pdf-viewer
             pdf_viewer(
                 str(pdf_path),
                 width=420,
-                height=650,
+                height=600,
                 render_text=True,
                 pages_to_render=st.session_state.pages_to_render,
-                key=f"pdf_viewer_{st.session_state.pages_to_render}"
+                scroll_to_page=st.session_state.current_page,
+                key=f"pdf_viewer_{st.session_state.pdf_key}"
             )
             
             # Page navigation
             st.divider()
-            col_prev, col_page, col_next = st.columns(3)
+            col_prev, col_page, col_next = st.columns([1, 2, 1])
+            
             with col_prev:
-                if st.button("⬅️ Prev", use_container_width=True):
+                if st.button("◀ Prev", use_container_width=True):
                     if st.session_state.current_page > 1:
                         st.session_state.current_page -= 1
                         st.session_state.pages_to_render = [st.session_state.current_page]
+                        st.session_state.pdf_key += 1
                         st.rerun()
             
             with col_page:
-                page_input = st.number_input(
-                    "Go to page:",
+                new_page = st.number_input(
+                    "Page:",
                     min_value=1,
                     max_value=500,
                     value=st.session_state.current_page,
-                    key="page_input"
+                    key=f"page_num_{st.session_state.pdf_key}",
+                    step=1,
+                    label_visibility="collapsed"
                 )
-                if page_input != st.session_state.current_page:
-                    st.session_state.current_page = page_input
-                    st.session_state.pages_to_render = [st.session_state.current_page]
+                if new_page != st.session_state.current_page:
+                    st.session_state.current_page = new_page
+                    st.session_state.pages_to_render = [new_page]
+                    st.session_state.pdf_key += 1
                     st.rerun()
             
             with col_next:
-                if st.button("Next ➡️", use_container_width=True):
+                if st.button("Next ▶", use_container_width=True):
                     st.session_state.current_page += 1
                     st.session_state.pages_to_render = [st.session_state.current_page]
+                    st.session_state.pdf_key += 1
                     st.rerun()
+            
+            st.caption(f"📖 Page {st.session_state.current_page}")
         
         except Exception as e:
             st.error(f"Error loading PDF: {e}")
@@ -147,6 +155,7 @@ with st.sidebar:
         st.session_state.messages = []
         st.session_state.current_page = 1
         st.session_state.pages_to_render = [1]
+        st.session_state.pdf_key += 1
         st.rerun()
     
     st.divider()
