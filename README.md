@@ -6,7 +6,9 @@ A RAG (Retrieval-Augmented Generation) application for querying the FAST-NUCES S
 
 - Python 3.12+
 - Docker (for Qdrant)
+    - version 1.18.2
 - Groq API key
+
 
 ## Setup
 
@@ -46,4 +48,4 @@ A RAG (Retrieval-Augmented Generation) application for querying the FAST-NUCES S
 
 ## Demo
 
-![Demo](image.png)
+![Demo](assets/demo_image.png)

@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   qdrant:
-    image: qdrant/qdrant:latest
+    image: qdrant/qdrant:v1.18.2
     container_name: student-rulebook-qdrant
 
     ports:

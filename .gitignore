@@ -47,3 +47,8 @@ qdrant_storage/
 
 # Misc
 dev_work/
+experiments/
+cli.py
+
+# Agents
+AGENTS.md
