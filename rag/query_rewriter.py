@@ -6,6 +6,7 @@ from config.config import GROQ_API_KEY, config
 client = Groq(api_key=GROQ_API_KEY)
 temperature = config["llm"]["groq"]["temperature"]
 llm_model = config["llm"]["groq"]["model"]
+seed = config["llm"]["groq"].get("seed", None)
 
 
 def rewrite_query(chat_history: list, question: str) -> str:
@@ -38,6 +39,7 @@ def rewrite_query(chat_history: list, question: str) -> str:
             },
         ],
         temperature=temperature,
+        seed=seed,
     )
     
     standalone_query = response.choices[0].message.content.strip().replace("Standalone Query:", "").strip()

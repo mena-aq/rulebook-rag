@@ -5,12 +5,13 @@ llm:
   groq:
     model: llama-3.3-70b-versatile
     temperature: 0
+    seed: 42
 
 embedding:
   model: gemini-embedding-001
 
 chunking:
-  max_tokens: 256
+  max_tokens: 512
   overlap_tokens: 50
 
 retrieval:

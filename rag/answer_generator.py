@@ -7,6 +7,7 @@ from config.config import GROQ_API_KEY, config
 client = groq.Groq(api_key=GROQ_API_KEY)
 llm_model = config["llm"]["groq"]["model"]
 temperature = config["llm"]["groq"]["temperature"]
+seed = config["llm"]["groq"].get("seed", None)
 
 def generate_answer(question: str, retrieved_chunks: list) -> str:
     """Generates an answer to the user's question based on the retrieved chunks
@@ -39,6 +40,7 @@ def generate_answer(question: str, retrieved_chunks: list) -> str:
             },
         ],
         temperature=temperature,
+        seed=seed,
     )
     
     return response.choices[0].message.content.strip()
