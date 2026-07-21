@@ -1,0 +1,14 @@
+.git
+.gitignore
+.env
+venv/
+__pycache__/
+*.pyc
+.streamlit/
+dev_work/
+scratch/
+tests/
+highlights/
+*.md
+demo.png
+assets/
